@@ -115,16 +115,18 @@ Hummus Recipe
 
 """,
 }
-
-
+#cache is a dictionary where the key is a url and value is the html content of the corresponding url, cache = {'url':'html_content',......}
+ 
 def ordered_search(index, ranks, keyword):
     if keyword in index:
         urlist=index[keyword]
         quicksort(urlist,ranks,0,len(urlist)-1)
+        #upon receiving the sorted urlist of the keyword, it returns this list, which finally get printed.
         return urlist
     else:
         return None
-        
+  
+#this method sorts the urlist of a particular keyword given by the previous written function (ordered_search) according to their ranks. then functions gets returned.
 def quicksort(urlist,ranks,first,last):
     if first>=last:
         return
@@ -148,12 +150,12 @@ def quicksort(urlist,ranks,first,last):
 
 
 
-
+#it recieves a url and checks if url exists in cache, it returns the html content of the corresponding url in case.
 def get_page(url):
     if url in cache:
         return cache[url]
     return ""
-
+   
 
 def get_next_target(page):
     start_link = page.find('<a href=')
@@ -164,6 +166,7 @@ def get_next_target(page):
     url = page[start_quote + 1:end_quote]
     return url, end_quote
 
+#this function will recieve a html content and will return the list of all the url(s)/link(s) in that content.
 def get_all_links(page):
     links = []
     while True:
@@ -181,6 +184,7 @@ def union(a, b):
         if e not in a:
             a.append(e)
 
+# below two functions do this: it takes the url and its corresponding html content, splits it in several words, and put these words in dictionary 'index' as key where the value of every word of the content will be the list of url(s), in which that word is appearing
 def add_page_to_index(index, url, content):
     words = content.split()
     for word in words:
@@ -199,18 +203,19 @@ def lookup(index, keyword):
         return None
 
 def crawl_web(seed): # returns index, graph of inlinks
-    tocrawl = [seed]
-    crawled = []
-    graph = {}  # <url>, [list of pages it links to]
-    index = {}
+    #seed contains the initial url where we start crawling
+    tocrawl = [seed]    #url to crawl to
+    crawled = []        #url which have been already crawled
+    graph = {}          #this is a dictionary graph:{'url1':[link1,link2,..],...}, the content at url1 contains link1 and link2 and so on
+    index = {}          #this is a dictionary index:{'keyword':[list of link(s)/url(s) whose content contains this keyword]}
     while tocrawl:
-        page = tocrawl.pop()
+        page = tocrawl.pop()   #page is a url
         if page not in crawled:
-            content = get_page(page)
+            content = get_page(page)  #content contains the html content of url, page
             add_page_to_index(index, page, content)
             outlinks = get_all_links(content)
             graph[page] = outlinks
-            union(tocrawl, outlinks)
+            union(tocrawl, outlinks) # gives us the remaining links to crawl leavind behind the duplicates
             crawled.append(page)
     return index, graph
 
